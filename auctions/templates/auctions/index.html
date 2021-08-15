@@ -1,0 +1,21 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+<h2>Active Listings</h2>
+
+{% for listing in listings %}
+<a href="{% url 'listing' listing.id %}">
+    <div style="display: flex;">
+        <img class="small-listing-img" src="{{ listing.image }}">
+        <div>
+            <h6>{{ listing.title }}</h6>
+            <p>{{ listing.description }}</p>
+            <p>${{ listing.price }}</p>
+        </div>
+    </div>
+</a>
+{% empty %}
+<p>There are no active listings.</p>
+{% endfor %}
+{% endblock %}

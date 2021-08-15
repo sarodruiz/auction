@@ -1,0 +1,66 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<!-- LISTING -->
+<h2>{{ listing.title}}</h2>
+
+{% if user.is_authenticated %}
+<form action="{% url 'watch' listing.id %}" method="POST">
+    {% csrf_token %}
+    {% if user in listing.watchers.all %}
+    <input type="submit" value="Remove Watchlist">
+    {% else %}
+    <input type="submit" value="Add Watchlist">
+    {% endif %}
+</form>
+{% endif %}
+
+<img class="large-listing-img" src="{{ listing.image }}" alt="listing image">
+<p>{{ listing.description }}</p>
+{% if listing.current_bid %}
+<h3>${{ listing.current_bid.amount }}</h3>
+{% else %}
+<h3>${{ listing.price }}</h3>
+{% endif %}
+
+<!-- BID -->
+{% if listing.active %}
+    {% if user.is_authenticated %}
+        {% if user == listing.user %}
+            <form action="{% url 'close' listing.id %}" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="Close">
+            </form>
+        {% else %}
+            <form action="{% url 'bid' listing.id %}" method="POST">
+                {% csrf_token %}
+                <input type="number" name="bid" min="{{ listing.price }}" value="{{ listing.price }}" required>
+                <input type="submit" value="Place Bid">
+            </form>
+        {% endif %}
+
+        <form action="{% url 'comment' listing.id %}" method="POST">
+            {% csrf_token %}
+            <textarea name="content" cols="90" rows="4" required></textarea>
+            <input type="submit" value="Comment">
+        </form>
+    {% endif %}
+{% else %}
+    <h1>WINNER: {{ listing.current_bid.user.username }}</h1>
+{% endif %}
+
+<!-- COMMENTS -->
+<ul>
+    {% for comment in listing.comments.all %}
+    <li>
+        <h6>{{ comment.user.username }}</h6>
+        <p>{{ comment.content }}</p>
+    </li>
+    {% empty %}
+    <li>    
+        <p>There are no comments.</p>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
